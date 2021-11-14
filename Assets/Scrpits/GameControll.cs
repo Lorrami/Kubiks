@@ -50,7 +50,7 @@ public class GameControll : MonoBehaviour
 
     private void Update()
     {
-        if (!IsButton && CubeCheck != null)
+        if (!IsButton && CubeCheck != null && allCubes != null)
         {
 #if !UNITY_EDITOR
             if (Input.GetTouch(0).phase != TouchPhase.Began)
