@@ -50,7 +50,7 @@ public class GameControll : MonoBehaviour
 
     private void Update()
     {
-        if (!IsButton && CubeCheck != null && allCubes != null)
+        if (!Lose && !IsButton && CubeCheck != null && allCubes != null && rb.velocity.magnitude < 0.1f)
         {
 #if !UNITY_EDITOR
             if (Input.GetTouch(0).phase != TouchPhase.Began)
@@ -61,37 +61,37 @@ public class GameControll : MonoBehaviour
                 firstStep = true;
                 foreach (GameObject obj in CanvasStart)
                     Destroy(obj);
+                return;
             }
 
-            GameObject newCube = Instantiate(cubeCreate, CubeCheck.position, Quaternion.identity) as GameObject;
+            GameObject newCube = Instantiate(cubeCreate, CubeCheck.position, Quaternion.identity);
             newCube.transform.SetParent(allCubes.transform);
             Cubik.SetVector3(CubeCheck.position);
             BannedPositions.Add(Cubik.GetVector3());
 
             Instantiate(Effect, CubeCheck.position, Quaternion.identity);
-            
-            rb.isKinematic = true;
-            rb.isKinematic = false;
 
             Position();
             CameraMove();
-        }
+            rb.isKinematic = true;
+            rb.isKinematic = false;
+            
 
-        if(!Lose && rb.velocity.magnitude > 0.1f)
+            if (Camera.main.backgroundColor != NeedColor)
+                Camera.main.backgroundColor = Color.Lerp(Camera.main.backgroundColor, NeedColor, Time.deltaTime / 1.5f);
+            IsButton = true;
+        }
+        mainCamera.localPosition = Vector3.MoveTowards(mainCamera.localPosition,
+            new Vector3(mainCamera.localPosition.x, YCameraMove, mainCamera.localPosition.z),
+            SpeedCam * Time.deltaTime);
+        if (!Lose && rb.velocity.magnitude > 0.1f)
         {
             Destroy(CubeCheck.gameObject);
             Lose = true;
             Reload.SetActive(true);
             StopCoroutine(Running);
+            return;
         }
-
-        mainCamera.localPosition = Vector3.MoveTowards(mainCamera.localPosition, 
-            new Vector3(mainCamera.localPosition.x, YCameraMove, mainCamera.localPosition.z),
-            SpeedCam * Time.deltaTime);
-
-        if (Camera.main.backgroundColor != NeedColor)
-            Camera.main.backgroundColor = Color.Lerp(Camera.main.backgroundColor, NeedColor, Time.deltaTime / 1.5f);
-        IsButton = true;
     }
 
     IEnumerator ShowCube()
@@ -147,7 +147,7 @@ public class GameControll : MonoBehaviour
     {
         if (newpos.y == 0)
             return false;
-        foreach(Vector3 pos in BannedPositions)
+        foreach(var pos in BannedPositions)
         {
             if (pos.x == newpos.x && pos.y == newpos.y && pos.z == newpos.z)
                 return false;
